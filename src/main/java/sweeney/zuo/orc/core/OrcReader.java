@@ -229,8 +229,8 @@ public class OrcReader {
     }
 
 
-    private FileSystem getFileSystem(Path path) {
-        if (path.toString().startsWith("file:")) {
+    private FileSystem getFileSystem(String path) {
+        if (path.startsWith("file:")) {
             return FileUtil.getLocalFileSystem();
         }
         return FileUtil.getHdfsFileSystem();
@@ -279,8 +279,12 @@ public class OrcReader {
     private void addPath(String pathStr) {
         FileSystem fileSystem = null;
         try {
-            fileSystem = getFileSystem(new Path(pathStr));
+            fileSystem = getFileSystem(pathStr);
             Path path = new Path(pathStr);
+            if (!fileSystem.exists(path)){
+                System.out.println(String.format("%s: No such file or directory", path.toString()));
+                return;
+            }
             if (fileSystem.isDirectory(path)) {
                 RemoteIterator<LocatedFileStatus> iterator = fileSystem.listFiles(path, false);
                 while (iterator.hasNext()) {
